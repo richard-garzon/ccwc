@@ -1,4 +1,4 @@
-use std::{fs, io};
+use std::fs;
 use std::io::{BufReader, BufRead};
 
 pub struct FileStats {
