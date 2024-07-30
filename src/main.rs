@@ -14,7 +14,7 @@ struct Cli {
 fn main() {
     let cli = Cli::parse();
 
-    let file_name = cli.file_name;
+  let file_name = cli.file_name;
 
     let contents = match file_name {
         Some(ref file_name) => fs::read_to_string(file_name).unwrap(),
