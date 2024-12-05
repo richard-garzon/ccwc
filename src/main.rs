@@ -14,12 +14,10 @@ struct Cli {
 fn main() {
     let cli = Cli::parse();
 
-  let file_name = cli.file_name;
-
-    let contents = match file_name {
-        Some(ref file_name) => fs::read_to_string(file_name).unwrap(),
+    let contents = match &cli.file_name {
+        Some(file_name) => fs::read_to_string(file_name).unwrap(),
         None => io::read_to_string(io::stdin()).unwrap(),
     };
 
-    println!("{} {}", contents.len(), file_name.unwrap());
+    println!("{} {}", contents.len(), cli.file_name.unwrap_or_default());
 }

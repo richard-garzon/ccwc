@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{BufReader, BufRead};
+use std::io::{BufRead, BufReader};
 
 pub struct FileStats {
     pub file_name: String,
@@ -10,13 +10,13 @@ pub struct FileStats {
 }
 
 impl FileStats {
-    pub fn new(file_name: String, bytes: usize, word_count: usize, line_count: i32) -> FileStats {
-        FileStats { 
+    pub fn new(file_name: String) -> FileStats {
+        FileStats {
             file_name: file_name,
-            bytes: bytes,
-            lines: line_count,
-            words: word_count,
-            characters: bytes,
+            bytes: 0,
+            lines: 0,
+            words: 0,
+            characters: 0,
         }
     }
     pub fn get_stats(&mut self, file_name: String) {
