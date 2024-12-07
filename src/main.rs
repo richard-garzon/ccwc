@@ -1,4 +1,4 @@
-use std::{fs, io};
+use ccwc::FileStats;
 
 use clap::Parser;
 
@@ -8,16 +8,28 @@ use clap::Parser;
 struct Cli {
     file_name: Option<String>,
 
-    #[arg(short = 'c', long = "")]
+    #[arg(short = 'c', long = "bytes")]
     is_bytes: bool,
+
+    #[arg(short = 'w', long = "words")]
+    is_words: bool,
+
+    #[arg(short = 'l', long = "lines")]
+    is_lines: bool,
+
+    #[arg(short = 'm', long = "chars")]
+    is_chars: bool,
 }
 fn main() {
     let cli = Cli::parse();
 
-    let contents = match &cli.file_name {
-        Some(file_name) => fs::read_to_string(file_name).unwrap(),
-        None => io::read_to_string(io::stdin()).unwrap(),
-    };
+    let mut file_stats = FileStats::new(&cli.file_name.unwrap());
 
-    println!("{} {}", contents.len(), cli.file_name.unwrap_or_default());
+    file_stats.populate_data();
+
+    // if all args passed, lwmc. if none, lwc
+    println!(
+        "l: {} w: {} c: {} m: {}",
+        file_stats.lines, file_stats.words, file_stats.bytes, &file_stats.chars
+    );
 }
