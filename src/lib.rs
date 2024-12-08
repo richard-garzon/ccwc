@@ -1,6 +1,5 @@
 use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
+use std::io::{BufRead, BufReader};
 
 pub struct FileStats {
     pub file_name: String,
@@ -10,10 +9,7 @@ pub struct FileStats {
     pub chars: usize,
 }
 
-pub fn read_lines<P: AsRef<Path>>(file_name: P) -> io::Result<io::Lines<io::BufReader<File>>> {
-    let file = File::open(file_name)?;
-    Ok(io::BufReader::new(file).lines())
-}
+const BUFSIZE: usize = 512;
 
 impl FileStats {
     pub fn new(file_name: &String) -> FileStats {
@@ -32,15 +28,42 @@ impl FileStats {
         let mut line_count = 0;
         let mut word_count = 0;
 
-        if let Ok(lines) = read_lines(&self.file_name) {
-            for l in lines {
-                let line = l.unwrap();
-                bytes += line.as_bytes().len();
-                characters += line.chars().count();
-                word_count += line.split_whitespace().count();
-                line_count += 1;
-                bytes += 1;
+        let file = File::open(&self.file_name).unwrap();
+        let mut reader = BufReader::with_capacity(BUFSIZE, file);
+        let mut in_word = false;
+
+        loop {
+            let length = {
+                let buffer = reader.fill_buf().unwrap();
+
+                for c in buffer {
+                    bytes += 1;
+
+                    if *c == b'\n' {
+                        line_count += 1;
+                    }
+
+                    if c.is_ascii_whitespace() {
+                        if in_word {
+                            word_count += 1;
+                            in_word = false;
+                        }
+                    } else {
+                        in_word = true;
+                    }
+                }
+
+                buffer.len()
+            };
+
+            if length == 0 {
+                break;
             }
+            reader.consume(length);
+        }
+
+        if in_word {
+            word_count += 1;
         }
 
         self.bytes = bytes;
