@@ -8,8 +8,6 @@ pub struct FileStats {
     pub chars: usize,
 }
 
-const BUFSIZE: usize = 512;
-
 impl FileStats {
     pub fn new() -> FileStats {
         FileStats {
@@ -34,11 +32,22 @@ impl FileStats {
             if bytes_read == 0 {
                 break;
             }
-
+            // count lines
             lines += 1;
+
+            // count bytes
             bytes += bytes_read;
+
+            // count words
             words += buffer.split_whitespace().count();
-            characters += buffer.len();
+
+            /*
+            count characers - i took this from:
+            https://github.com/llogiq/bytecount/blob/master/src/naive.rs
+             */
+            let as_bytes = buffer.as_bytes();
+            characters += as_bytes.iter().filter(|&&byte| (byte >> 6) != 0b10).count();
+
             buffer.clear();
         }
 
