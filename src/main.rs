@@ -1,4 +1,5 @@
 use ccwc::FileStats;
+use std::fs::File;
 
 use clap::Parser;
 
@@ -22,14 +23,16 @@ struct Cli {
 }
 fn main() {
     let cli = Cli::parse();
+    let file_name = cli.file_name.unwrap();
 
-    let mut file_stats = FileStats::new(&cli.file_name.unwrap());
+    let mut file_stats = FileStats::new();
+    let file = File::open(&file_name).unwrap();
 
-    file_stats.populate_data();
+    file_stats.populate_data(file);
 
     // if all args passed, lwmc. if none, lwc
     println!(
-        "l: {} w: {} c: {} m: {}",
+        "lines: {} words: {} bytes: {} chars: {}",
         file_stats.lines, file_stats.words, file_stats.bytes, &file_stats.chars
     );
 }
