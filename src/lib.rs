@@ -44,6 +44,9 @@ impl FileStats {
             /*
             count characers - i took this from:
             https://github.com/llogiq/bytecount/blob/master/src/naive.rs
+
+            and then read up on why it works here:
+            https://research.swtch.com/utf8
              */
             let as_bytes = buffer.as_bytes();
             characters += as_bytes.iter().filter(|&&byte| (byte >> 6) != 0b10).count();
