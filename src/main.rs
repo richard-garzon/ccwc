@@ -1,5 +1,7 @@
 use ccwc::FileStats;
 use std::fs::File;
+use std::io;
+use std::io::BufReader;
 
 use clap::Parser;
 
@@ -67,12 +69,24 @@ fn build_string(
 
 fn main() {
     let cli = Cli::parse();
-    let file_name = cli.file_name.unwrap();
+
+    let mut printable_file_name = String::new();
+
+    let reader: BufReader<Box<dyn io::Read>> = match cli.file_name {
+        Some(file_name) => {
+            printable_file_name.push_str(&file_name);
+            let file = File::open(&file_name).unwrap();
+            BufReader::new(Box::new(file))
+        }
+        None => {
+            let stdin = io::stdin();
+            BufReader::new(Box::new(stdin))
+        }
+    };
 
     let mut file_stats = FileStats::new();
-    let file = File::open(&file_name).unwrap();
 
-    file_stats.populate_data(file);
+    file_stats.populate_data(reader);
 
     let result = build_string(
         cli.is_bytes,
@@ -80,7 +94,7 @@ fn main() {
         cli.is_lines,
         cli.is_chars,
         file_stats,
-        &file_name,
+        &printable_file_name,
     );
 
     println!("{}", result);

@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::io;
 use std::io::{BufRead, BufReader};
 
 pub struct FileStats {
@@ -18,14 +18,13 @@ impl FileStats {
         }
     }
 
-    pub fn populate_data(&mut self, file: File) {
+    pub fn populate_data(&mut self, mut reader: BufReader<Box<dyn io::Read>>) {
         let mut bytes = 0;
         let mut characters = 0;
         let mut lines = 0;
         let mut words = 0;
 
         let mut buffer = String::new();
-        let mut reader = BufReader::new(&file);
 
         loop {
             let bytes_read = reader.read_line(&mut buffer).unwrap();
