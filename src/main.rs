@@ -36,51 +36,44 @@ fn build_string(
     file_stats: FileStats,
     file_name: &String,
 ) -> String {
-    let mut result = String::new();
+    let mut parts = Vec::new();
 
     if !(is_bytes || is_words || is_lines || is_chars) {
-        result.push_str(&format!(
-            "{} {} {} {}",
-            file_stats.lines.to_string(),
-            file_stats.words.to_string(),
-            file_stats.bytes.to_string(),
-            file_name
-        ));
-        return result;
+        parts.push(file_stats.lines.to_string());
+        parts.push(file_stats.words.to_string());
+        parts.push(file_stats.bytes.to_string());
+    } else {
+        if is_lines {
+            parts.push(file_stats.lines.to_string());
+        }
+        if is_words {
+            parts.push(file_stats.words.to_string());
+        }
+        if is_chars {
+            parts.push(file_stats.chars.to_string());
+        }
+        if is_bytes {
+            parts.push(file_stats.bytes.to_string());
+        }
     }
 
-    if is_lines {
-        result.push_str(&format!("  {}", file_stats.lines.to_string()))
-    }
-    if is_words {
-        result.push_str(&format!("  {}", file_stats.words.to_string()))
-    }
-    if is_chars {
-        result.push_str(&format!("  {}", file_stats.chars.to_string()))
-    }
-    if is_bytes {
-        result.push_str(&format!("  {}", file_stats.bytes.to_string()))
-    }
-
-    result.push_str(&format!("  {}", file_name));
-
-    return result;
+    parts.push(file_name.to_string());
+    return parts.join(" ");
 }
 
 fn main() {
     let cli = Cli::parse();
 
-    let mut printable_file_name = String::new();
-
-    let reader: BufReader<Box<dyn io::Read>> = match cli.file_name {
+    let (reader, printable_file_name): (BufReader<Box<dyn io::Read>>, String) = match cli.file_name
+    {
         Some(file_name) => {
-            printable_file_name.push_str(&file_name);
-            let file = File::open(&file_name).unwrap();
-            BufReader::new(Box::new(file))
+            let file = File::open(&file_name)
+                .unwrap_or_else(|_| panic!("failed while opening file {}", file_name));
+            (BufReader::new(Box::new(file)), file_name)
         }
         None => {
             let stdin = io::stdin();
-            BufReader::new(Box::new(stdin))
+            (BufReader::new(Box::new(stdin)), "".to_string())
         }
     };
 
